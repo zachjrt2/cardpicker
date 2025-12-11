@@ -135,9 +135,9 @@
         }
 
         .bet-input {
-            width: 120px;
+            width: 200px;
             padding: 12px 20px;
-            font-size: 1.2em;
+            font-size: 1em;
             border: 3px solid #667eea;
             border-radius: 15px;
             text-align: center;
@@ -183,12 +183,14 @@
             font-size: 1.1em;
             color: #22c55e;
             font-weight: bold;
+            word-break: break-word;
         }
 
         .potential-loss {
             font-size: 1.1em;
             color: #ef4444;
             font-weight: bold;
+            word-break: break-word;
         }
 
         .container {
@@ -218,6 +220,7 @@
             font-weight: bold;
             color: #667eea;
             margin-bottom: 20px;
+            word-break: break-all;
         }
 
         .stats {
@@ -245,6 +248,7 @@
             font-weight: bold;
             font-size: 1.2em;
             color: #333;
+            word-break: break-word;
         }
 
         .cards-container {
@@ -460,7 +464,7 @@
             
             <div class="bet-section">
                 <span class="bet-label">💰 Bet:</span>
-                <input type="number" id="betInput" class="bet-input" value="1" min="0" max="999999">
+                <input type="text" id="betInput" class="bet-input" value="1">
                 <div class="bet-buttons">
                     <button class="bet-quick-btn" id="betHalf">Half</button>
                     <button class="bet-quick-btn" id="betMax">All In</button>
@@ -497,6 +501,34 @@
 
         // Audio context for win sound
         let audioContext;
+        
+        function formatNumber(num) {
+            if (num < 1000) return num.toString();
+            
+            const suffixes = ['', 'K', 'M', 'B', 'T', 'Qa', 'Qi', 'Sx', 'Sp', 'Oc', 'No', 'Dc', 
+                            'UDc', 'DDc', 'TDc', 'QaDc', 'QiDc', 'SxDc', 'SpDc', 'OcDc', 'NoDc', 'Vg',
+                            'UVg', 'DVg', 'TVg', 'QaVg', 'QiVg', 'SxVg', 'SpVg', 'OcVg', 'NoVg', 'Tg',
+                            'UTg', 'DTg', 'TTg', 'QaTg', 'QiTg', 'SxTg', 'SpTg', 'OcTg', 'NoTg', 'Qd',
+                            'UQd', 'DQd', 'TQd', 'QaQd', 'QiQd', 'SxQd', 'SpQd', 'OcQd', 'NoQd', 'Qt',
+                            'UQt', 'DQt', 'TQt', 'QaQt', 'QiQt', 'SxQt', 'SpQt', 'OcQt', 'NoQt', 'Sd',
+                            'USd', 'DSd', 'TSd', 'QaSd', 'QiSd', 'SxSd', 'SpSd', 'OcSd', 'NoSd', 'St',
+                            'USt', 'DSt', 'TSt', 'QaSt', 'QiSt', 'SxSt', 'SpSt', 'OcSt', 'NoSt', 'Og',
+                            'UOg', 'DOg', 'TOg', 'QaOg', 'QiOg', 'SxOg', 'SpOg', 'OcOg', 'NoOg', 'Nn',
+                            'UNn', 'DNn', 'TNn', 'QaNn', 'QiNn', 'SxNn', 'SpNn', 'OcNn', 'NoNn', 'Ce'];
+            
+            let tier = Math.floor(Math.log10(num) / 3);
+            
+            if (tier >= suffixes.length) {
+                // For numbers beyond our suffix list, use scientific notation
+                return num.toExponential(2);
+            }
+            
+            const suffix = suffixes[tier];
+            const scale = Math.pow(10, tier * 3);
+            const scaled = num / scale;
+            
+            return scaled.toFixed(2) + suffix;
+        }
         
         function initAudio() {
             if (!audioContext) {
@@ -564,13 +596,25 @@
 
         function updateBetDisplay() {
             const betInput = document.getElementById('betInput');
-            let inputValue = parseInt(betInput.value) || 0;
+            let inputValue = betInput.value.trim();
+            
+            // Try to parse as a number - handle both regular and scientific notation
+            let parsedValue;
+            if (inputValue.includes('e') || inputValue.includes('E')) {
+                parsedValue = parseFloat(inputValue);
+            } else {
+                parsedValue = parseFloat(inputValue.replace(/[^0-9.]/g, ''));
+            }
+            
+            if (isNaN(parsedValue) || parsedValue < 0) {
+                parsedValue = 0;
+            }
             
             // Allow betting even with 0 score, but cap at score if score > 0
             if (score > 0) {
-                currentBet = Math.max(0, Math.min(score, inputValue));
+                currentBet = Math.min(score, parsedValue);
             } else {
-                currentBet = Math.max(0, inputValue);
+                currentBet = parsedValue;
             }
             
             betInput.value = currentBet;
@@ -578,8 +622,8 @@
             const potentialWin = calculatePoints();
             const potentialLoss = potentialWin * 2;
             
-            document.getElementById('potentialWin').textContent = potentialWin;
-            document.getElementById('potentialLoss').textContent = Math.min(potentialLoss, score);
+            document.getElementById('potentialWin').textContent = formatNumber(potentialWin);
+            document.getElementById('potentialLoss').textContent = formatNumber(Math.min(potentialLoss, score));
             
             // Update quick bet buttons - disable only if score is 0 AND bet is already 0
             document.getElementById('betHalf').disabled = score === 0;
@@ -587,10 +631,10 @@
         }
 
         function updateStats() {
-            document.getElementById('score').textContent = score;
+            document.getElementById('score').textContent = formatNumber(score);
             document.getElementById('totalCards').textContent = totalCards;
             document.getElementById('winningCards').textContent = winningCardsCount;
-            document.getElementById('pointsPerWin').textContent = calculatePoints();
+            document.getElementById('pointsPerWin').textContent = formatNumber(calculatePoints());
             document.getElementById('multiplier').textContent = calculateMultiplier().toFixed(2) + 'x';
             
             // Update costs display
@@ -707,7 +751,7 @@
                 const rect = e.currentTarget.getBoundingClientRect();
                 const floatingPoints = document.createElement('div');
                 floatingPoints.className = 'floating-points';
-                floatingPoints.textContent = `+${pointsEarned}`;
+                floatingPoints.textContent = `+${formatNumber(pointsEarned)}`;
                 floatingPoints.style.left = rect.left + rect.width / 2 - 50 + 'px';
                 floatingPoints.style.top = rect.top + rect.height / 2 + 'px';
                 document.body.appendChild(floatingPoints);
@@ -725,7 +769,7 @@
                 setTimeout(() => scoreElement.classList.remove('celebrate'), 2000);
                 
                 score += pointsEarned;
-                message.textContent = `🎊 You Won! +${pointsEarned} point${pointsEarned > 1 ? 's' : ''}!`;
+                message.textContent = `🎊 You Won! +${formatNumber(pointsEarned)} point${pointsEarned > 1 ? 's' : ''}!`;
                 message.classList.add('win');
                 
                 // Confetti effect with emojis
@@ -734,7 +778,7 @@
                 const pointsLost = calculatePoints() * 2;
                 const actualLoss = Math.min(pointsLost, score);
                 score = Math.max(0, score - pointsLost);
-                message.textContent = `💀 You Lost! That's a skill issue. -${actualLoss} point${actualLoss > 1 ? 's' : ''}`;
+                message.textContent = `💀 You Lost! That's a skill issue. -${formatNumber(actualLoss)} point${actualLoss > 1 ? 's' : ''}`;
                 message.classList.add('lose');
             }
             
