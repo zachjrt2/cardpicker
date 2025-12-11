@@ -119,6 +119,78 @@
             transform: translateY(0);
         }
 
+        .bet-section {
+            margin-bottom: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .bet-label {
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .bet-input {
+            width: 120px;
+            padding: 12px 20px;
+            font-size: 1.2em;
+            border: 3px solid #667eea;
+            border-radius: 15px;
+            text-align: center;
+            font-weight: bold;
+            background: linear-gradient(145deg, #ffffff, #f0f0f0);
+            transition: all 0.3s ease;
+        }
+
+        .bet-input:focus {
+            outline: none;
+            border-color: #764ba2;
+            box-shadow: 0 0 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .bet-buttons {
+            display: flex;
+            gap: 10px;
+        }
+
+        .bet-quick-btn {
+            padding: 8px 16px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.2s ease;
+            font-size: 0.9em;
+        }
+
+        .bet-quick-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .bet-quick-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .potential-win {
+            font-size: 1.1em;
+            color: #22c55e;
+            font-weight: bold;
+        }
+
+        .potential-loss {
+            font-size: 1.1em;
+            color: #ef4444;
+            font-weight: bold;
+        }
+
         .container {
             text-align: center;
             background: rgba(255, 255, 255, 0.95);
@@ -126,6 +198,13 @@
             border-radius: 20px;
             box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
             flex: 1;
+            position: relative;
+            overflow: hidden;
+            cursor: pointer;
+        }
+
+        .container.playing {
+            cursor: default;
         }
 
         h1 {
@@ -148,6 +227,7 @@
             margin-bottom: 20px;
             font-size: 1.1em;
             color: #666;
+            flex-wrap: wrap;
         }
 
         .stat {
@@ -196,7 +276,7 @@
         }
 
         .card.disabled {
-            cursor: not-allowed;
+            cursor: pointer;
             opacity: 0.6;
         }
 
@@ -221,6 +301,67 @@
             0%, 100% { transform: translateX(0); }
             25% { transform: translateX(-10px); }
             75% { transform: translateX(10px); }
+        }
+
+        @keyframes screenShake {
+            0%, 100% { transform: translate(0, 0) rotate(0deg); }
+            10% { transform: translate(-10px, -10px) rotate(-1deg); }
+            20% { transform: translate(10px, 10px) rotate(1deg); }
+            30% { transform: translate(-10px, 10px) rotate(-1deg); }
+            40% { transform: translate(10px, -10px) rotate(1deg); }
+            50% { transform: translate(-10px, -10px) rotate(-1deg); }
+            60% { transform: translate(10px, 10px) rotate(1deg); }
+            70% { transform: translate(-10px, 10px) rotate(-1deg); }
+            80% { transform: translate(10px, -10px) rotate(1deg); }
+            90% { transform: translate(-10px, -10px) rotate(-1deg); }
+        }
+
+        @keyframes floatUp {
+            0% {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+            100% {
+                opacity: 0;
+                transform: translateY(-150px) scale(1.5);
+            }
+        }
+
+        @keyframes rainbow {
+            0% { filter: hue-rotate(0deg); }
+            100% { filter: hue-rotate(360deg); }
+        }
+
+        @keyframes glow {
+            0%, 100% { box-shadow: 0 0 20px rgba(74, 222, 128, 0.5), 0 0 40px rgba(74, 222, 128, 0.3); }
+            50% { box-shadow: 0 0 40px rgba(74, 222, 128, 0.8), 0 0 80px rgba(74, 222, 128, 0.5); }
+        }
+
+        .game-container.shake {
+            animation: screenShake 0.5s ease;
+        }
+
+        .score.celebrate {
+            animation: rainbow 2s linear infinite;
+            font-size: 2.5em !important;
+            transition: font-size 0.3s ease;
+        }
+
+        .floating-points {
+            position: fixed;
+            font-size: 3em;
+            font-weight: bold;
+            color: #22c55e;
+            text-shadow: 0 0 10px rgba(34, 197, 94, 0.5), 0 0 20px rgba(34, 197, 94, 0.3);
+            pointer-events: none;
+            z-index: 1000;
+            animation: floatUp 2s ease-out forwards;
+        }
+
+        .card.winner {
+            background: linear-gradient(145deg, #4ade80, #22c55e);
+            border-color: #16a34a;
+            animation: pulse 0.5s ease, glow 1s ease-in-out infinite;
         }
 
         .message {
@@ -317,6 +458,24 @@
             
             <button class="next-round-btn" id="nextRoundBtn">Next Round</button>
             
+            <div class="bet-section">
+                <span class="bet-label">💰 Bet:</span>
+                <input type="number" id="betInput" class="bet-input" value="1" min="0" max="999999">
+                <div class="bet-buttons">
+                    <button class="bet-quick-btn" id="betHalf">Half</button>
+                    <button class="bet-quick-btn" id="betMax">All In</button>
+                </div>
+            </div>
+            
+            <div class="stats" style="margin-top: 10px; margin-bottom: 30px;">
+                <div class="potential-win">
+                    Win: +<span id="potentialWin">1</span> pts
+                </div>
+                <div class="potential-loss">
+                    Lose: -<span id="potentialLoss">2</span> pts
+                </div>
+            </div>
+            
             <div class="cards-container" id="cardsContainer"></div>
             
             <div class="message" id="message"></div>
@@ -334,6 +493,61 @@
         let addWinnerCost = 1;
         let addCardPurchases = 0;
         let addWinnerPurchases = 0;
+        let currentBet = 1;
+
+        // Audio context for win sound
+        let audioContext;
+        
+        function initAudio() {
+            if (!audioContext) {
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            }
+        }
+
+        function playWinSound() {
+            initAudio();
+            
+            // Create a celebratory sound with multiple tones
+            const now = audioContext.currentTime;
+            
+            // Play a chord of happy notes
+            const notes = [523.25, 659.25, 783.99]; // C5, E5, G5 (major chord)
+            
+            notes.forEach((freq, index) => {
+                const oscillator = audioContext.createOscillator();
+                const gainNode = audioContext.createGain();
+                
+                oscillator.connect(gainNode);
+                gainNode.connect(audioContext.destination);
+                
+                oscillator.frequency.value = freq;
+                oscillator.type = 'sine';
+                
+                gainNode.gain.setValueAtTime(0.3, now + index * 0.1);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, now + index * 0.1 + 0.5);
+                
+                oscillator.start(now + index * 0.1);
+                oscillator.stop(now + index * 0.1 + 0.5);
+            });
+            
+            // Add a high sparkle note
+            setTimeout(() => {
+                const sparkle = audioContext.createOscillator();
+                const sparkleGain = audioContext.createGain();
+                
+                sparkle.connect(sparkleGain);
+                sparkleGain.connect(audioContext.destination);
+                
+                sparkle.frequency.value = 1046.50; // C6
+                sparkle.type = 'sine';
+                
+                sparkleGain.gain.setValueAtTime(0.2, audioContext.currentTime);
+                sparkleGain.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.3);
+                
+                sparkle.start();
+                sparkle.stop(audioContext.currentTime + 0.3);
+            }, 200);
+        }
 
         function calculateMultiplier() {
             const winChance = winningCardsCount / totalCards;
@@ -345,7 +559,31 @@
         function calculatePoints() {
             const basePoints = totalCards - 2;
             const multiplier = calculateMultiplier();
-            return Math.ceil(basePoints * multiplier);
+            return Math.ceil(basePoints * multiplier * currentBet);
+        }
+
+        function updateBetDisplay() {
+            const betInput = document.getElementById('betInput');
+            let inputValue = parseInt(betInput.value) || 0;
+            
+            // Allow betting even with 0 score, but cap at score if score > 0
+            if (score > 0) {
+                currentBet = Math.max(0, Math.min(score, inputValue));
+            } else {
+                currentBet = Math.max(0, inputValue);
+            }
+            
+            betInput.value = currentBet;
+            
+            const potentialWin = calculatePoints();
+            const potentialLoss = potentialWin * 2;
+            
+            document.getElementById('potentialWin').textContent = potentialWin;
+            document.getElementById('potentialLoss').textContent = Math.min(potentialLoss, score);
+            
+            // Update quick bet buttons - disable only if score is 0 AND bet is already 0
+            document.getElementById('betHalf').disabled = score === 0;
+            document.getElementById('betMax').disabled = score === 0;
         }
 
         function updateStats() {
@@ -363,6 +601,8 @@
             document.getElementById('addCardBtn').disabled = score < addCardCost;
             document.getElementById('addWinnerBtn').disabled = 
                 score < addWinnerCost || winningCardsCount >= totalCards - 1;
+            
+            updateBetDisplay();
         }
 
         function generateWinningCards() {
@@ -396,23 +636,53 @@
             generateWinningCards();
             gameOver = false;
             
+            // If score is 0, set bet to 1 by default
+            if (score === 0 && currentBet === 0) {
+                currentBet = 1;
+                document.getElementById('betInput').value = currentBet;
+            }
+            // Reset bet to 1 if current bet exceeds score and score > 0
+            else if (score > 0 && currentBet > score) {
+                currentBet = Math.min(1, score);
+                document.getElementById('betInput').value = currentBet;
+            }
+            
             createCards();
             
             const message = document.getElementById('message');
             message.textContent = '';
             message.className = 'message';
             
+            const container = document.querySelector('.container');
+            container.classList.add('playing');
+            
             updateStats();
         }
 
         function handleCardClick(e) {
-            if (gameOver) return;
+            if (gameOver) {
+                // If game is already over, start next round
+                initRound();
+                return;
+            }
+            
+            // Ensure bet is at least 1 if it's 0
+            if (currentBet === 0) {
+                currentBet = 1;
+                document.getElementById('betInput').value = currentBet;
+                updateBetDisplay();
+            }
+            
+            e.stopPropagation(); // Prevent container click
             
             const clickedIndex = parseInt(e.currentTarget.dataset.index);
             const cards = document.querySelectorAll('.card');
             const message = document.getElementById('message');
             
             gameOver = true;
+            
+            const container = document.querySelector('.container');
+            container.classList.remove('playing');
             
             cards.forEach(card => {
                 card.classList.add('disabled');
@@ -429,9 +699,37 @@
             
             if (winningCardIndices.includes(clickedIndex)) {
                 const pointsEarned = calculatePoints();
+                
+                // Play win sound
+                playWinSound();
+                
+                // Create floating points animation
+                const rect = e.currentTarget.getBoundingClientRect();
+                const floatingPoints = document.createElement('div');
+                floatingPoints.className = 'floating-points';
+                floatingPoints.textContent = `+${pointsEarned}`;
+                floatingPoints.style.left = rect.left + rect.width / 2 - 50 + 'px';
+                floatingPoints.style.top = rect.top + rect.height / 2 + 'px';
+                document.body.appendChild(floatingPoints);
+                
+                setTimeout(() => floatingPoints.remove(), 2000);
+                
+                // Screen shake effect
+                const gameContainer = document.querySelector('.game-container');
+                gameContainer.classList.add('shake');
+                setTimeout(() => gameContainer.classList.remove('shake'), 500);
+                
+                // Score celebration effect
+                const scoreElement = document.querySelector('.score');
+                scoreElement.classList.add('celebrate');
+                setTimeout(() => scoreElement.classList.remove('celebrate'), 2000);
+                
                 score += pointsEarned;
                 message.textContent = `🎊 You Won! +${pointsEarned} point${pointsEarned > 1 ? 's' : ''}!`;
                 message.classList.add('win');
+                
+                // Confetti effect with emojis
+                createConfetti();
             } else {
                 const pointsLost = calculatePoints() * 2;
                 const actualLoss = Math.min(pointsLost, score);
@@ -441,6 +739,28 @@
             }
             
             updateStats();
+        }
+
+        function createConfetti() {
+            const emojis = ['🎉', '🎊', '⭐', '✨', '💫', '🌟', '🎆', '🎇'];
+            const container = document.querySelector('.container');
+            
+            for (let i = 0; i < 30; i++) {
+                setTimeout(() => {
+                    const confetti = document.createElement('div');
+                    confetti.textContent = emojis[Math.floor(Math.random() * emojis.length)];
+                    confetti.style.position = 'absolute';
+                    confetti.style.fontSize = Math.random() * 30 + 20 + 'px';
+                    confetti.style.left = Math.random() * 100 + '%';
+                    confetti.style.top = '50%';
+                    confetti.style.pointerEvents = 'none';
+                    confetti.style.zIndex = '999';
+                    confetti.style.animation = `floatUp ${Math.random() * 1 + 1.5}s ease-out forwards`;
+                    container.appendChild(confetti);
+                    
+                    setTimeout(() => confetti.remove(), 2500);
+                }, i * 30);
+            }
         }
 
         function buyAddCard() {
@@ -458,7 +778,7 @@
                 score -= addWinnerCost;
                 winningCardsCount++;
                 addWinnerPurchases++;
-                addWinnerCost = Math.ceil(3 * Math.pow(1.5, addWinnerPurchases));
+                addWinnerCost = Math.ceil(1 * Math.pow(1.5, addWinnerPurchases));
                 initRound();
             }
         }
@@ -466,6 +786,29 @@
         document.getElementById('addCardBtn').addEventListener('click', buyAddCard);
         document.getElementById('addWinnerBtn').addEventListener('click', buyAddWinner);
         document.getElementById('nextRoundBtn').addEventListener('click', initRound);
+        
+        // Bet input handlers
+        document.getElementById('betInput').addEventListener('input', updateBetDisplay);
+        document.getElementById('betInput').addEventListener('change', updateBetDisplay);
+        
+        document.getElementById('betHalf').addEventListener('click', function() {
+            currentBet = Math.floor(score / 2);
+            document.getElementById('betInput').value = currentBet;
+            updateBetDisplay();
+        });
+        
+        document.getElementById('betMax').addEventListener('click', function() {
+            currentBet = score;
+            document.getElementById('betInput').value = currentBet;
+            updateBetDisplay();
+        });
+        
+        // Click anywhere in container to go to next round (when game is over)
+        document.querySelector('.container').addEventListener('click', function(e) {
+            if (gameOver) {
+                initRound();
+            }
+        });
 
         initRound();
     </script>
